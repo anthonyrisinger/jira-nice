@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Affects all scripts:
+#   * Exit on error.
+#   * Disable pathname expansion (enable as needed).
+#   * Limit word-splitting to newlines only.
+set -ef; shopt -s extglob nullglob; IFS=$'\n'
+
+# Process exit stack when shell exits.
+trap 'exit $((127+1))' HUP
+trap 'exit $((127+2))' INT
+trap 'exit $((127+3))' QUIT
+trap 'exit $((127+15))' TERM
+trap 'rc=$?; set +e; _atexit' EXIT
+__atexit=()
+_atexit () {
+  debug "Processing ${#__atexit[@]} exit handler(s)..."
+  indices=("${!__atexit[@]}")
+  for ((i=${#indices[@]}-1; i>=0; i--)); do
+    handler=${__atexit[indices[i]]}
+    debug "[$handler] Executing handler..."
+    ${__atexit[indices[i]]}
+    debug "[$handler] Done (exit=$?)."
+  done
+  debug "Done (exit=$rc)."
+  return $rc
+}
+
+# User interface to exit stack.
+atexit () {
+  if [[ $1 =~ ^-([0-9]*)$ ]]; then
+    # Pop N objects from the stack.
+    local indices=("${!__atexit[@]}")
+    local length=${#__atexit[@]}
+    local offset=$(($length-${BASH_REMATCH[1]:-$length}))
+    for ((i=(offset>=0 && offset || 0); i<length; i++)); do
+      unset __atexit[i]
+    done
+  else
+    # Append N objects to the stack.
+    __atexit+=("${@}")
+  fi
+}
+
+# Wrappers for our dependencies.
+jira () { command $JIRA_BIN/jira "$@"; }
+y2j () { cat ${1:--} | command $JIRA_BIN/y2j; }
+jq () { command $JIRA_BIN/jq -L $JIRA_SCRIPTS/jq "$@"; }
+jqm () {
+  # $ORIGIN../lib is broken: https://github.com/stedolan/jq/issues/1312
+  local module callable flags prog
+  IFS=: read -r module callable <<<"$1"
+  IFS=- read -r callable flags <<<"${callable:-$module}"
+  prog="include \"$module\"; ${callable:-main}(\$argv)"
+  jq ${flags:+-${flags}} --argjson argv "${2:-[]}" "$prog"
+  # jq ${flags:+-${flags}} --args "$filter" "${@:2}" # jq 1.6+
+}
+
+# Logging utils.
+debug () { ((!DEBUG)) || log DEBUG "$@"; }
+info () { log INFO "$@"; }
+warn () { log WARN "$@"; }
+error () { log ERROR "$@"; }
+die () { log FATAL "$@"; exit 1; }
+log () { printf "%s %-5s %s\n" "$(date +%FT%T%z)" ${1:-DEBUG} "${2}"; } >&2
+
+# Create and cleanup tmpdir on demand.
+tmpdir_clean () { [[ ! -d $JIRA_TMP ]] || rm -rf $JIRA_TMP; JIRA_TMP=; }
+tmpdir () {
+  if [[ -z $JIRA_TMP ]]; then
+    JIRA_TMP=$(mktemp -d)
+    debug "[$JIRA_TMP] Created \$JIRA_TMP."
+    atexit tmpdir_clean
+  fi
+}
+
+# Works for all paths unless this script is directly in /.
+export JIRA_TMP=
+export JIRA_BIN=$(cd ${BASH_SOURCE[0]%/*}; pwd)
+export JIRA_SCRIPTS=$(cd ${JIRA_BIN%/*}/scripts; pwd)
+export JIRA_SCRIPT=${JIRA_SCRIPT//[^0-9A-Za-z]/-}
+
+# Export command options and arguments.
+. /dev/stdin <<<"$(
+jqm shutils:main-rc '["JIRA","rx",true]' <<EOF
+{"OPT": $JIRA_OPT}
+{"ARG": $JIRA_ARG}
+EOF
+)"
+
+# Normalize DEBUG to an integer.
+DEBUG=${JIRA_OPT_DEBUG:-${DEBUG:-0}}
+case $DEBUG in ([0-9]) ;; (true|on|t|x|y*) DEBUG=1;; (*) DEBUG=0;; esac
+declare -i DEBUG
+
+# Everything defined here is also available in helper.
+debug "[$JIRA_SCRIPT] Executing script..."
+. $JIRA_SCRIPTS/jira/$JIRA_SCRIPT.sh; main "${@}"; rc=$?
+debug "[$JIRA_SCRIPT] Done (exit=$rc)."
+
+# Trigger cleanup.
+exit $rc

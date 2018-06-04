@@ -1,0 +1,2 @@
+# Ignore all config parts except those bundled.
+[0-9][0-9]*-config.*

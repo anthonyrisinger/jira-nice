@@ -1,0 +1,101 @@
+fields:
+
+{{- $parent := or .parent.fields.issuetype.name "Epic" }}
+{{- $issue := and (ne .overrides.issuetype "Bug") .overrides.issuetype }}
+{{- $issue := or (and (not $issue) (eq $parent "Epic") "Story") $issue }}
+{{- $issue := or (and (not $issue) (eq $parent "Story") "Sub-task") $issue }}
+{{- $issue := or $issue "" }}
+{{- $project := or .overrides.project "UNKNOWN" }}
+{{- $priority := or .overrides.priority .meta.fields.priority.defaultValue.name "" }}
+
+  # Metadata.
+  issuetype:
+    name: {{ $issue }}
+  project:
+    key: {{ $project }}
+
+  {{- if or .parent (eq $issue "Sub-task") }}
+  parent:
+    key: {{ or .parent.key (append "-" $project) }}
+  {{- end }}
+
+  {{- if .meta.fields.components }}
+  components:
+    {{- if .overrides.components }}
+      {{- range (split "," (or .overrides.components "")) }}
+    - name: {{ . }}
+      {{- end }}
+    {{- else if .parent.fields.components }}
+      {{- range .parent.fields.components }}
+    - name: {{ .name }}
+      {{- end }}
+    {{- else }}
+      {{- range (split "," (or .overrides.default_components "")) }}
+    - name: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  # People.
+  {{- if .meta.fields.assignee }}
+  assignee:
+    {{- if .parent.fields.assignee }}
+    name: {{ or .parent.fields.assignee.key .overrides.user "" }}
+    {{- else }}
+    name: {{ or .overrides.assignee .overrides.user "" }}
+    {{- end }}
+  {{- end}}
+
+  {{- if .meta.fields.reporter }}
+  reporter:
+    name: {{ or .overrides.reporter .overrides.user }}
+  {{- end }}
+
+  # Ordering.
+  {{- if .meta.fields.priority }}
+  priority:
+    name: {{ $priority }}
+  {{- end }}
+
+  {{- if eq $issue "Story" }}
+
+    {{- $f1 := or env.JIRA_CUSTOMFIELD_EPIC_LINK "Epic Link" }}
+    {{- $f2 := or env.JIRA_CUSTOMFIELD_STORY_POINTS "Story Points" }}
+    {{- range .meta.fields }}
+      {{- if eq $f1 .key .name }}
+
+  # Epic.
+  {{ .key }}: {{ or $.overrides.epic "" }}
+
+      {{- end }}
+    {{- end }}
+    {{- range .meta.fields }}
+      {{- if eq $f2 .key .name }}
+
+  # Points.
+  {{ .key }}: {{ or $.overrides.points 3 }}
+
+      {{- end }}
+    {{- end }}
+
+  {{- end }}
+
+  {{- if eq $issue "Sub-task" }}
+
+    {{- if .meta.fields.timetracking }}
+
+  # Hours.
+  timetracking:
+    originalEstimate: {{ or .overrides.hours 4 }}h
+
+    {{- end }}
+
+  {{- end }}
+
+  # REQUIRED!
+  summary: >-
+    {{ or .overrides.summary "Summary" }}
+
+  # REQUIRED!
+  description: |
+    {{ or .overrides.description "Description" | indent 4 }}

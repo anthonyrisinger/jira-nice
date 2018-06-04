@@ -1,0 +1,152 @@
+#!/usr/bin/make -f
+#/////////////////////////////////////////////////////////////////////////////#
+
+# Deps to sync.
+deps = jira jq y2j
+
+# Where artifacts go.
+out = _build
+outbin = $(out)/bin
+outsrc = $(out)/src
+
+# Where artifacts are installed.
+dest = $(or $(DESTDIR),.)
+destbin = $(dest)/bin
+
+# `jira` vars.
+jira_tag = v1.0.17
+jira_git = https://github.com/Netflix-Skunkworks/go-jira
+jira_release = $(jira_git)/releases/download/$(jira_tag)
+jira_linux_bin = $(jira_release)/jira-linux-amd64
+jira_darwin_bin = $(jira_release)/jira-darwin-10.6-amd64
+jira_windows_bin = $(jira_release)/jira-windows-4.0-amd64.exe
+jira_bin = $(outbin)/jira_$(platform)
+jira_bins = $(foreach plat,$(platforms),$(outbin)/jira_$(plat))
+
+# `jq` vars.
+jq_tag = jq-1.5
+jq_git = https://github.com/stedolan/jq
+jq_release = $(jq_git)/releases/download/$(jq_tag)
+jq_linux_bin = $(jq_release)/jq-linux64
+jq_darwin_bin = $(jq_release)/jq-osx-amd64
+jq_windows_bin = $(jq_release)/jq-win64.exe
+jq_bin = $(outbin)/jq_$(platform)
+jq_bins = $(foreach plat,$(platforms),$(outbin)/jq_$(plat))
+
+# `y2j` vars.
+y2j_ref = HEAD
+y2j_git = https://github.com/bronze1man/yaml2json
+y2j_src = $(outsrc)/y2j.git
+y2j_bin = $(outbin)/y2j_$(platform)
+y2j_bins = $(foreach plat,$(platforms),$(outbin)/y2j_$(plat))
+# Stop make from trying to remove "intermediate" repo.
+.SECONDARY: $(y2j_src)
+
+# Final list of binaries we care about.
+platform_bins = $(foreach dep,$(deps),$($(dep)_bin))
+bins = $(foreach dep,$(deps),$(foreach bin,$($(dep)_bins),$(bin)))
+
+# End of configuration.
+#/////////////////////////////////////////////////////////////////////////////#
+
+# Dynamic PATH for $(shell) and recipes.
+# 	* `install`ed binaries available to both $(shell) and recipes.
+# 	* Easy to inject debugging like -x or -e.
+# 	* Add new entries with `PATH += /path`.
+# 		- Entries may contain colons.
+SHELL = env PATH=$(abspath $(outbin)):$(subst $(eval) ,:,$(PATH)) /bin/bash
+
+# Utilities.
+wrap  = fold -s -w $$(($(or $1,$${COLUMNS:-80})-3))
+wrapi = $(call wrap,$2) | pr -to$(or $1,2)
+wrapc = $(call wrap,$2) | column -t -s$(or $1,$$'\t')
+
+# Detect current platform.
+ifeq ($(OS),Windows_NT)
+  platform = windows
+else
+  platform = $(shell uname -s | tr [[:upper:]] [[:lower:]])
+endif
+
+# Detect output platforms.
+plats = linux darwin windows
+ifeq ($(filter all,$(MAKECMDGOALS)),all)
+  platforms = $(plats)
+else
+  platforms = $(platform)
+endif
+ifeq ($(platforms),all)
+  override platforms = $(plats)
+endif
+ifeq ($(platforms),)
+  override platforms = $(platform)
+endif
+
+# Ensure these exist.
+$(outsrc) $(outbin) $(destbin):
+	mkdir -p $@
+
+# Clone from $dep_git.
+$(outsrc)/%.git: | $(outsrc)
+	git clone --no-checkout --single-branch $($*_git) $@
+	cd $@ && git checkout $($*_ref) -- .
+
+# Build `y2j`.
+$(y2j_bins): $(outsrc)/y2j.git
+	cd $< &&\
+		export GOPATH=$(abspath $</go) CGO_ENABLED=0 &&\
+		export GOOS=$(@F:y2j_%=%) GOARCH=amd64 &&\
+		mkdir -p "$$GOPATH/src/github.com/bronze1man" &&\
+		ln -fns "$(abspath $<)" "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
+		cd "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
+			go get &&\
+			go build -o $(abspath $@)
+
+# Fetch everything else from $dep_plat_bin.
+$(jq_bins) $(jira_bins): | $(outbin)
+	curl --progress-bar --location --output "$@" "$($(@F)_bin)"
+	chmod +x $@
+
+#/////////////////////////////////////////////////////////////////////////////#
+
+## What you are looking at.
+help: argv0 = $(word 1,$(MAKEFILE_LIST))
+help: ##
+	@echo -n "Usage: $(if $(filter Makefile,$(argv0)),make,$(argv0))"
+	@echo -e " [config=override ...] [goal ...]\n" | $(wrap)
+	@echo -e "Connect JIRA and accelerate the team!\n" | $(wrapi)
+	@echo -e "Goals:\n" | $(wrap)
+	@sed -n -E\
+			-e '/^## +(.*)/{s//\1/;H;$$!d;}'\
+			-e $$'/^([^_][-_[:alnum:]]+):.*##/{s//  \\1\t/;G;s/\\n+/ /gp;s/.*//;h;}'\
+			$(MAKEFILE_LIST) | sort | $(wrapc)
+
+## Dump resolved values of user variables.
+dump: ##
+	@printf '%s\n' $(foreach x,$(sort $(.VARIABLES)),\
+			$(if $(filter-out environment% default automatic,\
+			$(origin $x)),"$x"$$'\t'"$($x)")) |\
+		$(call wrapc,,1000)
+
+## Drop build products.
+clean: ##
+	rm -rf $(out)
+
+## Drop installed binaries.
+uninstall: ##
+	rm -f $(foreach dep,$(deps),$(destbin)/$(notdir $(dep)))
+
+## Copy platform binaries to $DESTDIR/bin.
+install: $(platform_bins) | $(destbin) ##
+	for bin in $^; do \
+		cp -a $$bin $(destbin)/$$(basename $${bin%_*});\
+	done
+
+## Fetch and build binaries.
+all:: $(bins) ##
+
+# Print help by default.
+.DEFAULT_GOAL = help
+
+# List CLI targets here.
+.PHONY: help dump all clean install uninstall
