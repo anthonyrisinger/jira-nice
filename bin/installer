@@ -99,8 +99,8 @@ $(y2j_bins): $(outsrc)/y2j.git
 		mkdir -p "$$GOPATH/src/github.com/bronze1man" &&\
 		ln -fns "$(abspath $<)" "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
 		cd "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
-			go get &&\
-			go build -o $(abspath $@)
+			GO111MODULE=off go get &&\
+			GO111MODULE=off go build -o $(abspath $@)
 
 # Fetch everything else from $dep_plat_bin.
 $(jq_bins) $(jira_bins): | $(outbin)
