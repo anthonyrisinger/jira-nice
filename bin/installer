@@ -14,17 +14,17 @@ dest = $(or $(DESTDIR),.)
 destbin = $(dest)/bin
 
 # `jira` vars.
-jira_tag = v1.0.17
-jira_git = https://github.com/Netflix-Skunkworks/go-jira
+jira_tag = v1.0.27
+jira_git = https://github.com/go-jira/jira
 jira_release = $(jira_git)/releases/download/$(jira_tag)
 jira_linux_bin = $(jira_release)/jira-linux-amd64
-jira_darwin_bin = $(jira_release)/jira-darwin-10.6-amd64
-jira_windows_bin = $(jira_release)/jira-windows-4.0-amd64.exe
+jira_darwin_bin = $(jira_release)/jira-darwin-amd64
+jira_windows_bin = $(jira_release)/jira-windows-amd64.exe
 jira_bin = $(outbin)/jira_$(platform)
 jira_bins = $(foreach plat,$(platforms),$(outbin)/jira_$(plat))
 
 # `jq` vars.
-jq_tag = jq-1.5
+jq_tag = jq-1.6
 jq_git = https://github.com/stedolan/jq
 jq_release = $(jq_git)/releases/download/$(jq_tag)
 jq_linux_bin = $(jq_release)/jq-linux64
