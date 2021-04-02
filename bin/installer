@@ -142,7 +142,7 @@ install-bin: $(platform_bins) | $(dest)/bin ##
 	done
 
 ## Copy repo to $DESTDIR.
-install-jirad: .jira.d/config.yml .jira.d/config.sh .jira.d/config .jira.d/scripts .jira.d/templates | $(dest)/.jira.d ##
+install-jirad: .jira.d/config.yml .jira.d/config.sh .jira.d/config .jira.d/bin .jira.d/scripts .jira.d/templates | $(dest)/.jira.d ##
 	for bin in $^; do \
 		if ! [ "$$bin" -ef "$(dest)/$$bin" ]; then \
 			cp -a $$bin $(dest)/$$bin; \
