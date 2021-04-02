@@ -21,6 +21,7 @@ jira_darwin_bin = $(jira_release)/jira-darwin-amd64
 jira_windows_bin = $(jira_release)/jira-windows-amd64.exe
 jira_bin = $(outbin)/jira_$(platform)
 jira_bins = $(foreach plat,$(platforms),$(outbin)/jira_$(plat))
+jira_d = .jira.d/config.yml .jira.d/config.sh .jira.d/config .jira.d/bin .jira.d/scripts .jira.d/templates
 
 # `jq` vars.
 jq_tag = jq-1.6
@@ -106,6 +107,9 @@ $(jq_bins) $(jira_bins): | $(outbin)
 	curl --progress-bar --location --output "$@" "$($(@F)_bin)"
 	chmod +x $@
 
+$(jira_d):
+	true
+
 #/////////////////////////////////////////////////////////////////////////////#
 
 ## What you are looking at.
@@ -142,10 +146,14 @@ install-bin: $(platform_bins) | $(dest)/bin ##
 	done
 
 ## Copy repo to $DESTDIR.
-install-jirad: .jira.d/config.yml .jira.d/config.sh .jira.d/config .jira.d/bin .jira.d/scripts .jira.d/templates | $(dest)/.jira.d ##
+install-jirad: $(jira_d) | $(dest)/.jira.d ##
 	for bin in $^; do \
 		if ! [ "$$bin" -ef "$(dest)/$$bin" ]; then \
-			cp -a $$bin $(dest)/$$bin; \
+			if [ -d "$$bin/" ]; then \
+				cp -a $$bin/ $(dest)/$$bin/; \
+			else \
+				cp -a $$bin $(dest)/$$bin; \
+			fi; \
 		fi; \
 	done
 
@@ -159,4 +167,4 @@ all:: $(bins) ##
 .DEFAULT_GOAL = help
 
 # List CLI targets here.
-.PHONY: help dump all clean install uninstall
+.PHONY: help dump all clean install install-bin install-jirad uninstall
