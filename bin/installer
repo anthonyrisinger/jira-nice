@@ -83,7 +83,7 @@ ifeq ($(platforms),)
 endif
 
 # Ensure these exist.
-$(outsrc) $(outbin) $(dest)/bin $(dest)/.jira.d:
+$(outsrc) $(outbin) $(dest)/.jira.d $(dest)/.jira.d/bin:
 	mkdir -p $@
 
 # Clone from $dep_git.
@@ -137,12 +137,12 @@ clean: ##
 
 ## Drop installed binaries.
 uninstall: ##
-	rm -f $(foreach dep,$(deps),$(dest)/bin/$(notdir $(dep)))
+	rm -f $(foreach dep,$(deps),$(dest)/.jira.d/bin/$(notdir $(dep)))
 
 ## Copy platform binaries to $DESTDIR/bin.
-install-bin: $(platform_bins) | $(dest)/bin ##
+install-bin: $(platform_bins) | $(dest)/.jira.d/bin ##
 	for bin in $^; do \
-		cp -a $$bin $(dest)/bin/$$(basename $${bin%_*});\
+		cp -a $$bin $(dest)/.jira.d/bin/$$(basename $${bin%_*});\
 	done
 
 ## Copy repo to $DESTDIR.
