@@ -11,7 +11,6 @@ outsrc = $(out)/src
 
 # Where artifacts are installed.
 dest = $(or $(DESTDIR),.)
-destbin = $(dest)/bin
 
 # `jira` vars.
 jira_tag = v1.0.27
@@ -83,7 +82,7 @@ ifeq ($(platforms),)
 endif
 
 # Ensure these exist.
-$(outsrc) $(outbin) $(destbin):
+$(outsrc) $(outbin) $(dest)/bin $(dest)/.jira.d:
 	mkdir -p $@
 
 # Clone from $dep_git.
@@ -134,13 +133,21 @@ clean: ##
 
 ## Drop installed binaries.
 uninstall: ##
-	rm -f $(foreach dep,$(deps),$(destbin)/$(notdir $(dep)))
+	rm -f $(foreach dep,$(deps),$(dest)/bin/$(notdir $(dep)))
 
 ## Copy platform binaries to $DESTDIR/bin.
-install: $(platform_bins) | $(destbin) ##
+install-bin: $(platform_bins) | $(dest)/bin ##
 	for bin in $^; do \
-		cp -a $$bin $(destbin)/$$(basename $${bin%_*});\
+		cp -a $$bin $(dest)/bin/$$(basename $${bin%_*});\
 	done
+
+## Copy repo to $DESTDIR.
+install-jirad: .jira.d | $(dest)/.jira.d ##
+	[[ $^ -ef $(dest)/$^ ]] || \
+		cp -a $^/ $(dest)/$^/
+
+## Copy everything to $DESTDIR.
+install: install-jirad install-bin ##
 
 ## Fetch and build binaries.
 all:: $(bins) ##
