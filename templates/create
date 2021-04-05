@@ -42,7 +42,7 @@ fields:
     {{- if .parent.fields.assignee }}
     name: {{ or .parent.fields.assignee.key .overrides.user .overrides.login "" }}
     {{- else }}
-    name: {{ or .overrides.assignee .overrides.user .overrides.login "" }}
+    name:
     {{- end }}
   {{- end}}
 
