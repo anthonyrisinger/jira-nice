@@ -40,15 +40,15 @@ fields:
   {{- if .meta.fields.assignee }}
   assignee:
     {{- if .parent.fields.assignee }}
-    name: {{ or .parent.fields.assignee.key .overrides.user "" }}
+    name: {{ or .parent.fields.assignee.key .overrides.user .overrides.login "" }}
     {{- else }}
-    name: {{ or .overrides.assignee .overrides.user "" }}
+    name: {{ or .overrides.assignee .overrides.user .overrides.login "" }}
     {{- end }}
   {{- end}}
 
   {{- if .meta.fields.reporter }}
   reporter:
-    name: {{ or .overrides.reporter .overrides.user }}
+    name: {{ or .overrides.reporter .overrides.user .overrides.login }}
   {{- end }}
 
   # Ordering.
