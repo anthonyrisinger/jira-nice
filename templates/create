@@ -46,11 +46,6 @@ fields:
     {{- end }}
   {{- end}}
 
-  {{- if .meta.fields.reporter }}
-  reporter:
-    name: {{ or .overrides.reporter .overrides.user .overrides.login }}
-  {{- end }}
-
   # Ordering.
   {{- if .meta.fields.priority }}
   priority:
