@@ -19,7 +19,7 @@ In all other cases, _Standalone_ is used.
 $ bin/installer install clean
 ```
 
-### Ready user config (`~/.jira.d/config.yml`)
+### Ready user config (`~/.jira.d/config/20-config.yml`)
 ```bash
 user=NAME
 login=NAME@COMPANY
