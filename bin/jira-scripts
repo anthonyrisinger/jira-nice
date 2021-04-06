@@ -74,10 +74,16 @@ tmpdir () {
   fi
 }
 
-# Works for all paths unless this script is directly in /.
+if ! command -v realpath >/dev/null; then
+    realpath() (
+        perl -MCwd -e "print Cwd::abs_path('$1')"
+    )
+fi
+
 export JIRA_TMP=
-export JIRA_BIN=$(cd ${BASH_SOURCE[0]%/*}; pwd)
-export JIRA_SCRIPTS=$(cd ${JIRA_BIN%/*}/scripts; pwd)
+export JIRA_D=$(realpath "$(dirname "$0")/..")
+export JIRA_BIN=$JIRA_D/bin
+export JIRA_SCRIPTS=$JIRA_D/scripts
 export JIRA_SCRIPT=${JIRA_SCRIPT//[^0-9A-Za-z]/-}
 
 # Export command options and arguments.
