@@ -15,27 +15,44 @@ In all other cases, _Standalone_ is used.
 ## Quickstart (Standalone)
 
 ### Ready environment
-```console
-$ bin/installer install clean
+```bash
+DESTDIR=~ bin/installer install clean
+PATH=~/.jira.d/bin:$PATH
 ```
 
 ### Ready user config (`~/.jira.d/config/20-config.yml`)
 ```bash
-user=NAME
-login=NAME@COMPANY
-endpoint=https://COMPANY.atlassian.net
-project=PROJECT
+NAME=c
+COMPANY=anthonyrisinger
+PROJECT=PROJ
+```
+```bash
+user=$NAME
+login=$NAME@$COMPANY.com
+endpoint=https://$COMPANY.atlassian.net
+project=$PROJECT
+```
+Calls to `config` merge and update with existing `config/20-config.yml`:
+```bash
+jira config user=$user login=$login endpoint=$endpoint project=$project
+jira config password-source=keyring
 ```
 ```console
-$ bin/jira config user=$user login=$login endpoint=$endpoint
-$ bin/jira config project=$project password-source=keyring 
-$ bin/jira config
+$ jira config
 {
-	"endpoint": "https://COMPANY.atlassian.net",
-	"login": "NAME@COMPANY",
-	"password-source": "keyring",
-	"project": "PROJECT",
-	"user": "NAME"
+  "endpoint": "https://anthonyrisinger.atlassian.net",
+  "login": "c@anthonyrisinger.com",
+  "password-source": "keyring",
+  "project": "PROJ",
+  "user": "c"
+}
+$ cat ~/.jira.d/config/20-config.yml
+{
+  "endpoint": "https://anthonyrisinger.atlassian.net",
+  "login": "c@anthonyrisinger.com",
+  "password-source": "keyring",
+  "project": "PROJ",
+  "user": "c"
 }
 ```
 
