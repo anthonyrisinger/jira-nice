@@ -32,7 +32,7 @@ login=$NAME@$COMPANY.com
 endpoint=https://$COMPANY.atlassian.net
 project=$PROJECT
 ```
-Calls to `config` merge and update with existing `config/20-config.yml`:
+Calls to `config` merge and update with existing `~/.jira.d/config/20-config.yml`:
 ```bash
 jira config user=$user login=$login endpoint=$endpoint project=$project
 jira config password-source=keyring
