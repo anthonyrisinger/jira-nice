@@ -54,6 +54,17 @@ $ cat ~/.jira.d/config/20-config.yml
   "project": "PROJ",
   "user": "c"
 }
+$ ~/.jira.d/config.sh | jq
+{
+  "custom-commands": [
+    "list of {...} after merging with ~/.jira.d/config/10-defaults.yml"
+  ],
+  "endpoint": "https://anthonyrisinger.atlassian.net",
+  "login": "c@anthonyrisinger.com",
+  "password-source": "keyring",
+  "project": "PROJ",
+  "user": "c"
+}
 ```
 
 ### Ready API token (https://id.atlassian.com/manage/api-tokens)
