@@ -10,7 +10,7 @@ custom-commands:
         short: f
         type: STRING
         help: Config file
-        default: ~/.jira.d/config.yml
+        default: ~/.jira.d/config/20-config.yml
       - name: compact
         short: c
         type: BOOL
