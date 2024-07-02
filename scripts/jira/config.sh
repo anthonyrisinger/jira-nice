@@ -16,7 +16,7 @@ main () {
 
   # Get disk config.
   if [[ -r $path ]]; then
-    one=$(y2j < $path)
+    one=$(yq < $path)
   else
     one='{}'
   fi

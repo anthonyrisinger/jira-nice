@@ -44,7 +44,7 @@ atexit () {
 
 # Wrappers for our dependencies.
 jira () { command $JIRA_BIN/jira "$@"; }
-y2j () { cat ${1:--} | command $JIRA_BIN/y2j; }
+yq () { cat ${1:--} | command $JIRA_BIN/yq; }
 jq () { command $JIRA_BIN/jq -L $JIRA_SCRIPTS/jq "$@"; }
 jqm () {
   # $ORIGIN../lib is broken: https://github.com/stedolan/jq/issues/1312
