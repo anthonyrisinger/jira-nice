@@ -2,7 +2,7 @@
 #/////////////////////////////////////////////////////////////////////////////#
 
 # Deps to sync.
-deps = jira jq y2j
+deps = jira jq yq
 
 # Where artifacts go.
 out = _build
@@ -33,14 +33,15 @@ jq_windows_bin = $(jq_release)/jq-win64.exe
 jq_bin = $(outbin)/jq_$(platform)
 jq_bins = $(foreach plat,$(platforms),$(outbin)/jq_$(plat))
 
-# `y2j` vars.
-y2j_ref = HEAD
-y2j_git = https://github.com/bronze1man/yaml2json
-y2j_src = $(outsrc)/y2j.git
-y2j_bin = $(outbin)/y2j_$(platform)
-y2j_bins = $(foreach plat,$(platforms),$(outbin)/y2j_$(plat))
-# Stop make from trying to remove "intermediate" repo.
-.SECONDARY: $(y2j_src)
+# `yq` vars.
+yq_tag = v1.3
+yq_git = https://github.com/bronze1man/yaml2json
+yq_release = $(yq_git)/releases/download/$(yq_tag)
+yq_linux_bin = $(yq_release)/yaml2json_linux_amd64
+yq_darwin_bin = $(yq_release)/yaml2json_darwin_amd64
+yq_windows_bin = $(yq_release)/yaml2json_windows_amd64
+yq_bin = $(outbin)/yq_$(platform)
+yq_bins = $(foreach plat,$(platforms),$(outbin)/yq_$(plat))
 
 # Final list of binaries we care about.
 platform_bins = $(foreach dep,$(deps),$($(dep)_bin))
@@ -91,19 +92,8 @@ $(outsrc)/%.git: | $(outsrc)
 	git clone --no-checkout --single-branch $($*_git) $@
 	cd $@ && git checkout $($*_ref) -- .
 
-# Build `y2j`.
-$(y2j_bins): $(outsrc)/y2j.git
-	cd $< &&\
-		export GOPATH=$(abspath $</go) CGO_ENABLED=0 &&\
-		export GOOS=$(@F:y2j_%=%) GOARCH=amd64 &&\
-		mkdir -p "$$GOPATH/src/github.com/bronze1man" &&\
-		ln -fns "$(abspath $<)" "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
-		cd "$$GOPATH/src/github.com/bronze1man/yaml2json" &&\
-			GO111MODULE=off go get &&\
-			GO111MODULE=off go build -o $(abspath $@)
-
 # Fetch everything else from $dep_plat_bin.
-$(jq_bins) $(jira_bins): | $(outbin)
+$(yq_bins) $(jq_bins) $(jira_bins): | $(outbin)
 	curl --progress-bar --location --output "$@" "$($(@F)_bin)"
 	chmod +x $@
 
