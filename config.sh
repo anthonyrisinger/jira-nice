@@ -6,7 +6,7 @@ set -ef; shopt -s extglob nullglob; IFS=$'\n'
 DIR=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
 CONFIGS=($(set +f; printf '%s\n' $DIR/{,../.jira.}config/[0-9][0-9]-*))
 
-yq () { command $DIR/bin/yq "$@"; }
+yaml2json () { command $DIR/bin/yaml2json "$@"; }
 jq () { command $DIR/bin/jq "$@"; }
 
 scanner () {
@@ -24,7 +24,7 @@ configurables () {
       $config
     elif [[ $config =~ .yml$ ]]; then
       # Text files by definition end with a newline!
-      yq < $config; echo
+      yaml2json < $config; echo
     else
       jq -c . $config
     fi

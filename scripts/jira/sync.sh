@@ -20,7 +20,7 @@ sync () {
     debug "     size: $size"
     debug "  stories: $stories"
     debug "    tasks: $tasks"
-  done < <(yq < $doc | jq -rc "$filter")
+  done < <(yaml2json < $doc | jq -rc "$filter")
 
   info "[$doc] Done."
 }

@@ -2,7 +2,7 @@
 #/////////////////////////////////////////////////////////////////////////////#
 
 # Deps to sync.
-deps = jira jq yq
+deps = jira jq yaml2json
 
 # Where artifacts go.
 out = _build
@@ -13,14 +13,10 @@ outsrc = $(out)/src
 dest = $(or $(DESTDIR),.)
 
 # `jira` vars.
-jira_tag = v1.0.27
-jira_git = https://github.com/go-jira/jira
-jira_release = $(jira_git)/releases/download/$(jira_tag)
-jira_linux_bin = $(jira_release)/jira-linux-amd64
-jira_darwin_bin = $(jira_release)/jira-darwin-amd64
-jira_windows_bin = $(jira_release)/jira-windows-amd64.exe
-jira_bin = $(outbin)/jira_$(platform)
-jira_bins = $(foreach plat,$(platforms),$(outbin)/jira_$(plat))
+jira_tag = v1.0.28
+jira_git = github.com/go-jira/jira/cmd/jira
+jira_bin = $(outbin)/jira
+jira_bins = $(outbin)/jira
 jira_d = .jira.d/config.yml .jira.d/config.sh .jira.d/config .jira.d/bin .jira.d/scripts .jira.d/templates
 
 # `jq` vars.
@@ -33,15 +29,11 @@ jq_windows_bin = $(jq_release)/jq-win64.exe
 jq_bin = $(outbin)/jq_$(platform)
 jq_bins = $(foreach plat,$(platforms),$(outbin)/jq_$(plat))
 
-# `yq` vars.
-yq_tag = v1.3
-yq_git = https://github.com/bronze1man/yaml2json
-yq_release = $(yq_git)/releases/download/$(yq_tag)
-yq_linux_bin = $(yq_release)/yaml2json_linux_amd64
-yq_darwin_bin = $(yq_release)/yaml2json_darwin_amd64
-yq_windows_bin = $(yq_release)/yaml2json_windows_amd64
-yq_bin = $(outbin)/yq_$(platform)
-yq_bins = $(foreach plat,$(platforms),$(outbin)/yq_$(plat))
+# `yaml2json` vars.
+yaml2json_tag = v1.3.2
+yaml2json_git = github.com/bronze1man/yaml2json
+yaml2json_bin = $(outbin)/yaml2json
+yaml2json_bins = $(outbin)/yaml2json
 
 # Final list of binaries we care about.
 platform_bins = $(foreach dep,$(deps),$($(dep)_bin))
@@ -87,15 +79,14 @@ endif
 $(outsrc) $(outbin) $(dest)/.jira.d $(dest)/.jira.d/bin:
 	mkdir -p $@
 
-# Clone from $dep_git.
-$(outsrc)/%.git: | $(outsrc)
-	git clone --no-checkout --single-branch $($*_git) $@
-	cd $@ && git checkout $($*_ref) -- .
-
 # Fetch everything else from $dep_plat_bin.
-$(yq_bins) $(jq_bins) $(jira_bins): | $(outbin)
+$(jq_bins): | $(outbin)
 	curl --progress-bar --location --output "$@" "$($(@F)_bin)"
 	chmod +x $@
+
+# Install via 'go install'.
+$(jira_bins) $(yaml2json_bins):
+	GOBIN=$(abspath $(@D)) go install $($(@F)_git)@$($(@F)_tag)
 
 $(jira_d):
 	true
@@ -132,7 +123,8 @@ uninstall: ##
 ## Copy platform binaries to $DESTDIR/bin.
 install-bin: $(platform_bins) | $(dest)/.jira.d/bin ##
 	for bin in $^; do \
-		cp -a $$bin $(dest)/.jira.d/bin/$$(basename $${bin%_*});\
+		name=$$(basename $$bin); \
+		cp -a $$bin $(dest)/.jira.d/bin/$${name%_$(platform)}; \
 	done
 
 ## Copy repo to $DESTDIR.

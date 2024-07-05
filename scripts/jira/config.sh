@@ -16,7 +16,7 @@ main () {
 
   # Get disk config.
   if [[ -r $path ]]; then
-    one=$(yq < $path)
+    one=$(yaml2json < $path)
   else
     one='{}'
   fi
