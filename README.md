@@ -15,12 +15,21 @@ In all other cases, _Standalone_ is used.
 ## Quickstart (Standalone)
 
 ### Ready environment
+
+Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It will `install` the connector into your home directory then `clean` up temporary outputs.
+
 ```bash
 DESTDIR=~ bin/jira-nice-installer install clean
 PATH=~/.jira.d/bin:$PATH
 ```
 
-### Ready user config (`~/.jira.d/config/20-config.yml`)
+### Ready user config
+
+Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It creates shell variables for the next step.
+* Update `NAME` to match the username part of _your_ email!
+* Update `COMPANY` to the second- or third-level of _your_ email!
+    > ie. drop any TLD, such as ".com". It's less common (but possible) that your JIRA endpoint is different from your email domain -- look at the URL in the JIRA UI for the correct value.
+
 ```bash
 NAME=c
 COMPANY=anthonyrisinger
@@ -78,7 +87,3 @@ $ bin/jira list # Can timeout if token not entered in time, ignore.
 $ bin/jira --help
 $ bin/jira list
 ```
-
-## Quickstart (Embedded)
-
-### TODO
