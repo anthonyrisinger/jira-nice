@@ -1,4 +1,4 @@
-# JIRA Nice
+# JIRA NICE
 
 JIRA CLI integrations useful in daily development.
 
@@ -14,7 +14,7 @@ In all other cases, _Standalone_ is used.
 
 ## Quickstart (Standalone)
 
-### Ready environment
+### HOME is where JIRA lives rent-free
 
 Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It will `install` the connector into your home directory then `clean` up temporary outputs.
 
@@ -23,12 +23,12 @@ DESTDIR=~ bin/jira-nice-installer install clean
 PATH=~/.jira.d/bin:$PATH
 ```
 
-### Ready user config
+### JIRA --login at the right --endpoint
 
 Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It creates shell variables for the next step.
 * Update `NAME` to match the username part of _your_ email!
 * Update `COMPANY` to the second- or third-level of _your_ email!
-    > ie. drop any TLD, such as ".com". It's less common (but possible) that your JIRA endpoint is different from your email domain -- look at the URL in the JIRA UI for the correct value.
+    > ie. drop any TLD, such as ".com". It's less common (but possible) that your JIRA endpoint is different from your email domain --- look at the URL in the JIRA UI for the correct value.
 
 ```bash
 NAME=c
@@ -76,13 +76,13 @@ $ ~/.jira.d/config.sh | jq
 }
 ```
 
-### Ready API token (https://id.atlassian.com/manage/api-tokens)
+### Generate a fresh API token (https://id.atlassian.com/manage/api-tokens)
 ```console
 $ bin/jira list # Can timeout if token not entered in time, ignore.
 ? Jira API-Token [FIRST.LAST@COMPANY]:  [? for help] ************************
 ```
 
-### Try it out
+### This is the moment of truth
 ```console
 $ bin/jira --help
 $ bin/jira list
