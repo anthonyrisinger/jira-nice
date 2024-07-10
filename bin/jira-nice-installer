@@ -129,12 +129,12 @@ install-bin: $(platform_bins) | $(dest)/.jira.d/bin ##
 
 ## Copy repo to $DESTDIR.
 install-jirad: $(jira_d) | $(dest)/.jira.d ##
-	for bin in $^; do \
-		if ! [ "$$bin" -ef "$(dest)/$$bin" ]; then \
-			if [ -d "$$bin/" ]; then \
-				cp -a $$bin/ $(dest)/$$bin/; \
+	for dest in $^; do \
+		if ! [ "$$dest" -ef "$(dest)/$$dest" ]; then \
+			if [ -d "$$dest/" ]; then \
+				cp -a $$dest/ $(dest)/$$dest/; \
 			else \
-				cp -a $$bin $(dest)/$$bin; \
+				cp -a $$dest $(dest)/$$dest; \
 			fi; \
 		fi; \
 	done
