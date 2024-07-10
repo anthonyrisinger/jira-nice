@@ -23,4 +23,4 @@ custom-commands:
       JIRA_SCRIPT=config \
       JIRA_OPT={{options | toMinJson | shellquote}} \
       JIRA_ARG={{args | toMinJson | shellquote}} \
-        exec {{jira}}-scripts
+        exec {{jira}}-nice-scripts
