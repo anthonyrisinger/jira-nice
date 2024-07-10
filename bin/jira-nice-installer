@@ -76,12 +76,12 @@ ifeq ($(platforms),)
 endif
 
 # Ensure these exist.
-$(outsrc) $(outbin) $(dest)/.jira.d $(dest)/.jira.d/bin:
+$(outsrc) $(outbin) $(dest)/.jira.d:
 	mkdir -p $@
 
 # Fetch everything else from $dep_plat_bin.
 $(jq_bins): | $(outbin)
-	curl --progress-bar --location --output "$@" "$($(@F)_bin)"
+	curl --progress-bar --create-dirs --location --output "$@" "$($(@F)_bin)"
 	chmod +x $@
 
 # Install via 'go install'.
