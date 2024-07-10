@@ -19,7 +19,7 @@ In all other cases, _Standalone_ is used.
 Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It will `install` the connector into your home directory then `clean` up temporary outputs.
 
 ```bash
-DESTDIR=~ bin/jira-nice-installer install clean
+DESTDIR=~ make install clean
 PATH=~/.jira.d/bin:$PATH
 ```
 
