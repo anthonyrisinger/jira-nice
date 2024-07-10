@@ -16,7 +16,7 @@ In all other cases, _Standalone_ is used.
 
 ### Ready environment
 ```bash
-DESTDIR=~ bin/installer install clean
+DESTDIR=~ bin/jira-nice-installer install clean
 PATH=~/.jira.d/bin:$PATH
 ```
 
