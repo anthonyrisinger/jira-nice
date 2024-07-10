@@ -1,1 +1,1 @@
-bin/installer
+bin/jira-nice-installer
