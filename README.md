@@ -28,7 +28,7 @@ PATH=~/.jira.d/bin:$PATH
 Paste the following in your _terminal_, **one line at a time**, and **exactly as written**. It creates shell variables for the next step.
 * Update `NAME` to match the username part of _your_ email!
 * Update `COMPANY` to the second- or third-level of _your_ email!
-    > ie. drop any TLD, such as ".com". It's less common (but possible) that your JIRA endpoint is different from your email domain --- look at the URL in the JIRA UI for the correct value.
+    > ie. drop any TLD, such as ".com". It's less common (but possible) that your JIRA endpoint is different from your email domain (look at the URL in the JIRA UI for the correct value).
 
 ```bash
 NAME=c
