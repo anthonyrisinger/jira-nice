@@ -24,19 +24,3 @@ custom-commands:
       JIRA_OPT={{options | toMinJson | shellquote}} \
       JIRA_ARG={{args | toMinJson | shellquote}} \
         exec {{jira}}-scripts
-  - name: sync
-    help: Sync issue documents.
-    options:
-      - name: debug
-        short: d
-        type: COUNTER
-        help: Show DEBUG log events.
-    args:
-      - name: DOC
-        repeat: true
-        required: true
-    script: |
-      JIRA_SCRIPT=sync \
-      JIRA_OPT={{options | toMinJson | shellquote}} \
-      JIRA_ARG={{args | toMinJson | shellquote}} \
-        exec {{jira}}-scripts
