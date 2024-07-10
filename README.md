@@ -1,4 +1,4 @@
-# JIRA Sane
+# JIRA Nice
 
 JIRA CLI integrations useful in daily development.
 
@@ -7,7 +7,7 @@ The connector is installed in one of two ways. They differ only on config search
 * _Standalone_ searches `.jira.d/config`.
 * _Embedded_ searches `.jira.d/config` and `.jira.d/../.jira.config`.
 
-_Embedded_ is used when `jira-sane` is running inside a parent git repo. In this setup,
+_Embedded_ is used when `jira-nice` is running inside a parent git repo. In this setup,
 configs in the parent are found and merged, thus impacting all commands. This enables
 repo-specific defaults, overrides, and git-based installation (submodule or clone).
 In all other cases, _Standalone_ is used.
