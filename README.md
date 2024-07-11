@@ -1,6 +1,6 @@
 # JIRA NICE
 
-JIRA CLI integrations useful in daily development.
+JIRA CLI integrations useful in daily development. It configures [go-jira](https://github.com/go-jira/jira) to play NICE.
 
 The connector is installed in one of two ways. They differ only on config search path:
 
@@ -87,3 +87,7 @@ $ bin/jira list # Can timeout if token not entered in time, ignore.
 $ bin/jira --help
 $ bin/jira list
 ```
+
+## Templates
+
+`go-jira` exposes [its own template functions](https://github.com/go-jira/jira/blob/4263bd24f9e9c702a92358c5cd7ce0ddd711df4c/jiracli/templates.go#L69-L200) and all [generic sprig template functions](https://github.com/Masterminds/sprig/blob/master/functions.go#L97-L382) to your custom templates.
